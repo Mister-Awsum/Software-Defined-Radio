@@ -1,0 +1,90 @@
+Project Summary & Key Notes
+
+1. OVERVIEW
+
+This project focuses on digital signal processing (DSP) and real-time audio handling using Python and C++. It involves modeling, implementation, constraints, and integration.
+
+Modeling Topics (Python)
+> Convolution
+> Fourier Transform
+> I/Q Samples
+> Multirate DSP
+> FM Demodulation
+> PLL (Phase-Locked Loop)
+> Clock/Data Recovery
+> ISI (Inter-Symbol Interference)
+> Frame Synchronization
+
+Implementation Topics (C++)
+> Multi-threading
+> Queues & Unix Pipes
+> Semaphores & Mutexes
+> Performance Optimization
+> Real-time Processing
+> C++ STL (Standard Template Library)
+
+2. PROJECT TIMELINE AND DEADLINES
+
+> Feb 10: Wrap up Lab 4, receive kits, understand constraints
+> Feb 17: Acclimate with spec, refactor Lab 3 to C++
+> Feb 24: Implement mono path using UNIX pipes
+> Mar 3: Work on stereo path (carrier recovery, PLLs)
+> Mar 10: Threading & synchronization
+> Mar 17: RDS path (differences from previous tasks)
+> Mar 24: Source code due, report expectations discussed
+> Mar 31 - Apr 4: In-class presentations & examinations
+> Apr 4: Final report due
+
+3. KNOWLEDGE BUILDING AND RESPONSIBILITIES
+
+> Mono Path (Mode 0): Every team member must understand Python modeling & C++ implementation.
+> Other Modes: Use concurrent engineering, with each member taking at least one modeling and one implementation task.
+> Unit Tests:
+	Mandatory for downsampler & resampler
+	Recommended for all new functions before integration
+
+4. PRACTICAL ASPECTS AND IMPLEMENTATION DETAILS
+
+Handling I/Q Samples:
+
+Record 8-bit IQ samples from RF dongle using:
+rtl_sdr -f 99.9M -s 2.4M - > my_samples_u8.raw
+
+Process samples using Unix pipes:
+cat my_samples_u8.raw | ./my_proj | aplay -c 1 -f S16_LE -r 48000
+
+Terminal Shit:
+Mode 0: "cat ../data/iq_samples/samples0.raw | ./project m 0 | aplay -c 1 -f s16_LE -r 48000"
+Mode 1: "cat ../data/iq_samples/_1152.raw | ./project m 1 | aplay -c 1 -f s16_LE -r 32000"
+Mode 2: "cat ../data/iq_samples/samples0.raw | ./project m 2 | aplay -c 1 -f s16_LE -r 44100"
+Mode 3: "cat ../data/iq_samples/_2304.raw | ./project m 3 | aplay -c 1 -f s16_LE -r 44100"
+Debug: cat ../data/iq_samples/samples0.raw | valgrind --leak-check=full ./project m 2 | aplay -c 1 -f s16_LE -r 44100
+Rate Change: "python3 ../model/fmRateChange.py ../data/iq_samples/samples0.raw Out_Index In_Index"
+Plotting stuff: "gnuplot -e 'set terminal png size 1024,768' ../data/example.gnuplot > ../data/example.png"
+
+Remake:
+./build.sh && cd build
+
+If processing is slow, split into two steps:
+cat my_samples_u8.raw | ./my_proj > my_audio.bin  
+cat my_audio.bin | aplay -c 1 -f S16_LE -r 48000
+
+Reading/Writing Data in C++ via Unix Pipes:
+> Read from stdin, process, and adjust float to real
+> Write blocks of data to stdout for efficiency
+
+Configuring Operation Modes via Terminal:
+./my_proj          # Default mode  
+./my_proj 2        # Mode 2
+
+Output Formatting Considerations:
+> Input: 8-bit unsigned integers
+> Output: 16-bit signed integers (Little Endian)
+> Stereo audio: Interleave left & right channels
+
+5. IMPORTANT CONSIDERATIONS
+
+> Performance Optimization: Use multi-threading, mutexes, and profiling tools.
+> Project Complexity: Manage through structured timelines, hierarchical tasks, and unit testing.
+> Collaboration: Ensure fair workload distribution and knowledge sharing.
+> Final Deliverables: Source code (GitHub), presentations, and final report.
