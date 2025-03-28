@@ -1,0 +1,17 @@
+Brandon English:
+Debugged and added optimized functionality for C++ implementation of mono mode 1, 2, and 3
+Wrote and Debugged C++ multithreading implementation of front-end processing and audio processing
+
+Deyontae Patterson:
+Wrote Python model and C++ implementation for mono mode 0, 1, 2, and 3
+Debugged C++ multithreading implementation of front-end processing and audio processing
+
+Marco Sobol:
+RDS modelling (Parts of carrier recovery, rational resampler, Manchester and differential decoding)
+Stereo Modeling
+Stereo C++ implementation and debugging
+
+Victoria Black:
+RDS modelling and debugged RDS model
+Implemented fast convolution (upsample, convolve, downsample)
+debugged Demodulation

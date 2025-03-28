@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <iostream>
 #include "dy4.h"         // Defines dy4::real (e.g., typedef double)
-#include "MonoBlock.h"   // Contains declarations for fmDemodArctan and fmDemodulate
+#include "RFFrontEnd.h"   // Contains declarations for fmDemodArctan and fmDemodulate
 #include "gtest/gtest.h"
 
 namespace {
@@ -21,16 +21,16 @@ public:
     const double EPSILON = 1e-6;  // Tolerance for floating-point comparisons
 
     // Test signals for I and Q channels
-    std::vector<double> i_signal;
-    std::vector<double> q_signal;
+    std::vector<dy4::real> i_signal;
+    std::vector<dy4::real> q_signal;
     
     // Outputs for demodulation
-    std::vector<double> fm_demod_reference; // Computed via fmDemodArctan (reference)
-    std::vector<double> fm_demod_custom;    // Computed via fmDemodulate (custom)
+    std::vector<dy4::real> fm_demod_reference; // Computed via fmDemodArctan (reference)
+    std::vector<dy4::real> fm_demod_custom;    // Computed via fmDemodulate (custom)
 
     // Phase state variables:
-    double state_phase_ref = 0.0;
-    std::vector<double> state_phase_custom;
+    dy4::real state_phase_ref = 0.0;
+    std::vector<dy4::real> state_phase_custom;
 
     FM_Demod_Fixture() {
         i_signal.resize(N);
@@ -40,7 +40,7 @@ public:
         state_phase_custom.resize(2, 0.0); // Custom implementation uses I/Q state vector
     }
 
-    void generateFMSignal(std::vector<double>& signal, double min_val, double max_val) {
+    void generateFMSignal(std::vector<dy4::real>& signal, dy4::real min_val, dy4::real max_val) {
         for (int i = 0; i < N; i++) {
             signal[i] = min_val + (max_val - min_val) * i / (N - 1);
         }
@@ -65,8 +65,8 @@ public:
 };
 
 TEST_F(FM_Demod_Fixture, FM_Demod_Arctan_NEAR) {
-    std::vector<double> output(N, 0.0);
-    double phase_state = state_phase_ref;
+    std::vector<dy4::real> output(N, 0.0);
+    dy4::real phase_state = state_phase_ref;
     fmDemodArctan(i_signal, q_signal, phase_state, output);
 
     ASSERT_EQ(fm_demod_reference.size(), output.size()) 
@@ -84,7 +84,7 @@ TEST_F(FM_Demod_Fixture, FM_Demod_Custom_NEAR) {
     ASSERT_EQ(fm_demod_reference.size(), fm_demod_custom.size()) 
         << "Reference and custom outputs have different sizes.";
 
-    for (int i = 0; i < (int)fm_demod_reference.size(); ++i) {
+    for (int i = 1; i < (int)fm_demod_reference.size(); ++i) {
         EXPECT_NEAR(fm_demod_reference[i], fm_demod_custom[i], EPSILON)
             << "FM Demod mismatch at index " << i;
     }

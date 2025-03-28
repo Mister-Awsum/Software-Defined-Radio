@@ -62,15 +62,15 @@ void generateBPF(std::vector<dy4::real> &h, dy4::real f_low, dy4::real f_high, d
     for (int k = 0; k < taps; k++) {
         int n = k - centre;
         if (n == 0) {
-            h[k] = 2.0 / fs * (f_high - f_low);
+            h[k] = 2.0 * (f_high - f_low) / fs;
         } else {
-            h[k] = (sin(2 * M_PI * f_high * n / fs) - sin(2 * M_PI * f_low * n / fs)) / (M_PI * n);
+            h[k] = (sin(2 * PI * f_high * n / fs) - sin(2 * PI * f_low * n / fs)) / (PI * n);
         }
         // Apply Hann window:
-        h[k] *= 0.5 * (1 - cos(2 * M_PI * k / (taps - 1)));
+        h[k] *= 0.5 * (1 - cos(2 * PI * k / (taps - 1)));
         
         // Accumulate scale factor using the desired frequency response at f_mid:
-        scale_factor += h[k] * cos(2 * M_PI * n * f_mid / fs);
+        scale_factor += h[k] * cos(2 * PI * n * f_mid / fs);
     }
     
     // Normalize the coefficients so that the frequency response at f_mid is 1.
@@ -118,7 +118,6 @@ void convolveBlock(const std::vector<dy4::real>& signal, const std::vector<dy4::
 
 void convolveAndDecimate(const std::vector<dy4::real>& x, const std::vector<dy4::real>& h, std::vector<dy4::real>& state, int d, std::vector<dy4::real>& y) {
     int y_n = 0;
-    
     for (int n = 0; n < x.size(); n += d) {
         dy4::real sum = 0.0;
 
@@ -145,7 +144,7 @@ void convolveAndDecimate(const std::vector<dy4::real>& x, const std::vector<dy4:
     }
 }
 
-void ConvolveFast(const std::vector<dy4::real>& x, 
+/* void ConvolveFast(const std::vector<dy4::real>& x, 
                   const std::vector<dy4::real>& h, 
                   std::vector<dy4::real>& state, 
                   int u, int d, 
@@ -174,6 +173,38 @@ void ConvolveFast(const std::vector<dy4::real>& x,
             state[i] = x[x.size() - state_len + i];
         }
     }
+} */
+
+void ConvolveFast(const std::vector<dy4::real> &x, const std::vector<dy4::real> &h, std::vector<dy4::real> &state,
+                const int &u, const int &d, std::vector<dy4::real> &y){
+		// allocate memory for the impulse response
+		y.clear();
+		y.resize(x.size()*u/d, 0.0);
+		int phase = 0;
+		int fix = 0;
+		int temp = 0;
+
+		for (int i = 0; i < y.size(); i++){
+			// compute phase
+			temp = i * d;
+			phase = (d * i)%u;
+
+			// compute fix
+			fix = ((d * i)-(phase)) / u;
+
+			for (int k = phase; k < h.size();k+=u){
+				if (temp-k >= 0){
+					y[i] += h[k] * x[fix];
+				}
+				else{
+					y[i] += h[k] * state[state.size()+fix];
+				}
+				fix--;
+			}
+		}
+		//state saving for next block
+		int index = x.size() - h.size()/u + 1;
+		state = std::vector<dy4::real>(x.begin() + index, x.end());
 }
 
 

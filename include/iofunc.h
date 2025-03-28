@@ -27,5 +27,6 @@ void writeBinData(const std::string, const std::vector<dy4::real> &);
 //////////////////////////////////////////////////////////////
 
 void generate_random_values(std::vector<dy4::real>& x, const dy4::real& lower_bound, const dy4::real& upper_bound);
+void appendBinData(const std::string out_fname, const std::vector<dy4::real> &bin_data);
 
 #endif // DY4_IOFUNC_H

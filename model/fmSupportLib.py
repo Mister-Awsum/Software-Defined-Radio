@@ -59,6 +59,37 @@ def fmDemodArctan(I, Q, prev_phase = 0.0):
 	# (the last phase is needed to enable continuity for block processing)
 	return fm_demod, prev_phase
 
+def fmDemodCustom(I, Q, prev_IQ = [0.0, 0.0]):
+	#
+	# the default prev_phase phase is assumed to be zero, however
+	# take note in block processing it must be explicitly controlled
+
+	# empty vector to store the demodulated samples
+	fm_demod = np.empty(len(I))
+
+	# iterate through each of the I and Q pairs
+	for k in range(len(I)):
+
+		# calculate the current phase manually without using atan2
+		# using the method described in the provided reference
+		dI = I[k] - I[k-1] if k > 0 else I[k] - prev_IQ[0]
+		dQ = Q[k] - Q[k-1] if k > 0 else Q[k] - prev_IQ[1]
+		fm_demod[k] = (I[k] * dQ - Q[k] * dI) / (I[k]**2 + Q[k]**2) if I[k]**2 + Q[k]**2 > 0 else 0
+
+		# save the state of the current phase
+		# to compute the next derivative
+		prev_IQ = [I[k], Q[k]]
+
+	# return both the demodulated samples as well as the last IQ pair
+	# (the last IQ pair is needed to enable continuity for block processing)
+	return fm_demod, prev_IQ
+
+def delayBlock(input_block, state_block):
+    output_block = np.concatenate((state_block, input_block[:-len(state_block)]))
+    state_block = input_block[-len(state_block):]
+
+    return output_block, state_block
+
 # custom function for DFT that can be used by the PSD estimate
 def DFT(x):
 
@@ -186,6 +217,48 @@ def fmPlotPSD(ax, samples, Fs, height, title):
 	ax.set_xlabel('Frequency (kHz)')
 	ax.set_ylabel('PSD (db/Hz)')
 	ax.set_title(title)
+
+def convolve_fast(x, h, state, u, d):
+    """
+    Python implementation of the ConvolveFast function from C++.
+    
+    Parameters:
+        x (np.ndarray): Input signal.
+        h (np.ndarray): Filter coefficients.
+        state (np.ndarray): State from the previous block.
+        u (int): Upsampling factor.
+        d (int): Downsampling factor.
+    
+    Returns:
+        y (np.ndarray): Filtered and decimated output signal.
+        state (np.ndarray): Updated state for the next block.
+    """
+    # Allocate memory for the output signal
+    y = np.zeros(len(x) * u // d)
+    phase = 0
+    fix = 0
+    temp = 0
+
+    for i in range(len(y)):
+        # Compute phase
+        temp = i * d
+        phase = (d * i) % u
+
+        # Compute fix
+        fix = ((d * i) - phase) // u
+
+        for k in range(phase, len(h), u):
+            if temp - k >= 0:
+                y[i] += h[k] * x[fix]
+            else:
+                y[i] += h[k] * state[len(state) + fix]
+            fix -= 1
+
+    # State saving for the next block
+    index = len(x) - len(h) // u + 1
+    state = x[index:] if index < len(x) else np.array([])
+
+    return y, state
 
 if __name__ == "__main__":
 

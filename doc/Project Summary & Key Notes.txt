@@ -58,7 +58,18 @@ Mode 0: "cat ../data/iq_samples/samples0.raw | ./project m 0 | aplay -c 1 -f s16
 Mode 1: "cat ../data/iq_samples/_1152.raw | ./project m 1 | aplay -c 1 -f s16_LE -r 32000"
 Mode 2: "cat ../data/iq_samples/samples0.raw | ./project m 2 | aplay -c 1 -f s16_LE -r 44100"
 Mode 3: "cat ../data/iq_samples/_2304.raw | ./project m 3 | aplay -c 1 -f s16_LE -r 44100"
-Debug: cat ../data/iq_samples/samples0.raw | valgrind --leak-check=full ./project m 2 | aplay -c 1 -f s16_LE -r 44100
+
+ode 0: "cat ../data/iq_samples/stereo_l0_r9.raw | ./project s 0 | aplay -c 2 -f s16_LE -r 48000"
+Mode 1: "cat ../model/_1152.raw | ./project s 1 | aplay -c 2 -f s16_LE -r 32000"
+Mode 2: "cat ../data/iq_samples/stereo_l0_r9.raw | ./project s 2 | aplay -c 2 -f s16_LE -r 44100"
+Mode 3: "cat ../model/_2304.raw | ./project s 3 | aplay -c 2 -f s16_LE -r 44100"
+
+[Debug]
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+make 
+cat ../data/iq_samples/samples0.raw | valgrind --leak-check=full ./project m 2 | aplay -c 1 -f s16_LE -r 44100
+*look into gdb
+
 Rate Change: "python3 ../model/fmRateChange.py ../data/iq_samples/samples0.raw Out_Index In_Index"
 Plotting stuff: "gnuplot -e 'set terminal png size 1024,768' ../data/example.gnuplot > ../data/example.png"
 

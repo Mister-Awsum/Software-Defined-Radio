@@ -9,7 +9,7 @@
 import numpy as np
 import math
 
-def fmPll(pllIn, freq, Fs, ncoScale = 2.0, phaseAdjust = 0.0, normBandwidth = 0.01):
+def fmPll(pllIn, freq, Fs, pll_states, ncoScale = 2.0, phaseAdjust = 0.0, normBandwidth = 0.01):
 
 	"""
 
@@ -50,15 +50,17 @@ def fmPll(pllIn, freq, Fs, ncoScale = 2.0, phaseAdjust = 0.0, normBandwidth = 0.
 	Ki = (normBandwidth*normBandwidth)*Ci
 
 	# output array for the NCO
-	ncoOut = np.empty(len(pllIn)+1)
+	ncoOutI = np.empty(len(pllIn)+1)
+	ncoOutQ = np.empty(len(pllIn)+1)
 
 	# initialize internal state
-	integrator = 0.0
-	phaseEst = 0.0
-	feedbackI = 1.0
-	feedbackQ = 0.0
-	ncoOut[0] = 1.0
-	trigOffset = 0
+	integrator = pll_states[0]
+	phaseEst = pll_states[1]
+	feedbackI = pll_states[2]
+	feedbackQ = pll_states[3]
+	ncoOutI[0] = pll_states[4]
+	ncoOutQ[0] = pll_states[5]
+	trigOffset = pll_states[6]
 
 	# note: state saving will be needed for block processing
 	for k in range(len(pllIn)):
@@ -81,12 +83,15 @@ def fmPll(pllIn, freq, Fs, ncoScale = 2.0, phaseAdjust = 0.0, normBandwidth = 0.
 		trigArg = 2*math.pi*(freq/Fs)*(trigOffset) + phaseEst
 		feedbackI = math.cos(trigArg)
 		feedbackQ = math.sin(trigArg)
-		ncoOut[k+1] = math.cos(trigArg*ncoScale + phaseAdjust)
+		ncoOutI[k+1] = math.cos(trigArg*ncoScale + phaseAdjust)
+		ncoOutQ[k+1] = math.sin(trigArg*ncoScale + phaseAdjust)
 
 	# for stereo only the in-phase NCO component should be returned
 	# for block processing you should also return the state
 
-	return ncoOut
+	pll_states = [integrator, phaseEst, feedbackI, feedbackQ, np.cos(trigArg*ncoScale), np.sin(trigArg*ncoScale), trigOffset]
+
+	return ncoOutI, ncoOutQ, pll_states
 
 	# for RDS add also the quadrature NCO component to the output
 

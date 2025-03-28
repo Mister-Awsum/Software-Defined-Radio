@@ -9,11 +9,8 @@
 using namespace std;
 using namespace dy4;
 
-void readStdinBlockData(unsigned int num_samples, unsigned int block_id, std::vector<dy4::real> &block_data);
 void upsample(const std::vector<dy4::real> &signal, int factor, std::vector<dy4::real> &upsampled);
 void downsample(const std::vector<dy4::real> &signal, int factor, std::vector<dy4::real> &downsampled);
-void fmDemodArctan(const std::vector<dy4::real>& i_ds, const std::vector<dy4::real>& q_ds, dy4::real& state_phase, std::vector<dy4::real>& fm_demod);
-void fmDemodulate(const std::vector<dy4::real>& i_ds, const std::vector<dy4::real>& q_ds, std::vector<dy4::real>& state_phase, std::vector<dy4::real>& fm_demod);
 void generate_fm_values(std::vector<dy4::real>& signal, dy4::real min_val, dy4::real max_val);
 
 // FIR filtering function

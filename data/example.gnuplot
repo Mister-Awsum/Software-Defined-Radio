@@ -13,6 +13,7 @@ set yrange [-2:2]                       # set y plot range
 set xrange [0:511]                      # set x plot range
 plot '../data/demod_time.dat' using 1:2 with lines lt 1 lw 2 lc rgb '#000088' notitle
 
+
 # freq domain (Fourier)
 set ylabel 'Spectrum (Mag)'              # set y-axis label
 set xlabel 'Frequency bin'               # set x-axis label

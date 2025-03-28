@@ -68,3 +68,19 @@ void generate_random_values(std::vector<dy4::real>& x, const dy4::real& lower_bo
 		x[i] = lower_bound + (upper_bound - lower_bound) * ((dy4::real)(rand()) / RAND_MAX);
 	}
 }
+
+// Appends data in the raw binary file in the format corresponding to 'real'
+void appendBinData(const std::string out_fname, const std::vector<dy4::real> &bin_data)
+{
+    // Open the file in binary append mode
+    std::ofstream fdout(out_fname, std::ios::binary | std::ios::app);
+    if (!fdout) {
+        std::cerr << "Error opening file " << out_fname << " for appending ... exiting\n";
+        exit(1);
+    }
+
+    for (int i = 0; i < (int)bin_data.size(); i++) {
+        fdout.write(reinterpret_cast<const char *>(&bin_data[i]), sizeof(bin_data[i]));
+    }
+    fdout.close();
+}

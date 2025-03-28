@@ -25,7 +25,7 @@ void generateBPF(std::vector<dy4::real> &h, dy4::real f_low, dy4::real f_high, d
 void convolveFIR(std::vector<real> &, const std::vector<real> &, const std::vector<real> &);
 void convolveBlock(const std::vector<dy4::real>& signal, const std::vector<dy4::real>& coeffs, std::vector<dy4::real>& state, std::vector<dy4::real>& output);
 void convolveAndDecimate(const std::vector<dy4::real>& signal, const std::vector<dy4::real>& coeffs, std::vector<dy4::real>& state, int decimation_factor, std::vector<dy4::real>& output);
-void ConvolveFast(const std::vector<dy4::real>& x, const std::vector<dy4::real>& h, std::vector<dy4::real>& state, int u, int d, std::vector<dy4::real>& y);
+void ConvolveFast(const std::vector<dy4::real> &x, const std::vector<dy4::real> &h, std::vector<dy4::real> &state, const int &u, const int &d, std::vector<dy4::real> &y);
 
 //////////////////////////////////////////////////////////////
 // New code as part of benchmarking/testing and the project
